@@ -4,7 +4,7 @@ A C++ Script (Eventually I'll Make a GUI) Which Sorts Files Into Sub-Folders Bas
 ### License
 
 This work is licensed under a
-[Attribution-NonCommercial-NoDerivatives 4.0 International][cc-by].
+[Attribution-NonCommercial-NoDerivatives 4.0 International][cc-by] License.
 
 ![CC BY 4.0][cc-by-image]
 
