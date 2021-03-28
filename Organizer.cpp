@@ -8,21 +8,12 @@
 namespace fs = std::filesystem;
 
 // Struct Which Wraps the FileSystem Error Class, To Assist With Handling Errors That Might Crop Up
-// Default Constructor is No Error, While The String Constructor is Designed to Take fs::filesystem_error e.what()
-// TODO Reach out to someone regarding best practices and whether this is a valid / future-proof method of error detection
-struct customError {
-    bool error;
-    std::string errorMsg;
+const struct customError {
+    const bool error;
+    const std::string errorMsg;
+    
+    customError(bool error, std::string errorMsg) : error(error), errorMsg(errorMsg) {}
 
-    customError(std::string errorMsg) {
-        error = true;
-        errorMsg = errorMsg;
-    }
-
-    customError() {
-        error = false;
-        errorMsg = "";
-    }
 };
 
 class Organizer {
@@ -46,7 +37,7 @@ private:
     bool ignoreExistingDirs;
 
     // Helper Method
-    int getDepth(fs::path a, fs::path b) {
+    static int getDepth(const fs::path a, const fs::path b) {
 
         int aCnt = 0;
         int bCnt = 0;
@@ -77,6 +68,8 @@ public:
 
         // Default Values
         ignoreExistingDirs = false;
+        deleteOriginal = false;
+        recursiveDepth = 1;
     }
 
     // Now This Might be Overkill For The Setter Methods,
@@ -89,10 +82,10 @@ public:
         }
 
         catch (fs::filesystem_error fsErr) {
-            return customError(fsErr.what());
+            return customError(true, fsErr.what());
         }
 
-        return customError();
+        return customError(false, "");
     }
 
     customError setOutputPath(std::string str) {
@@ -103,10 +96,10 @@ public:
         }
 
         catch (fs::filesystem_error fsErr) {
-            return customError(fsErr.what());
+            return customError(true, fsErr.what());
         }
 
-        return customError();
+        return customError(false, "");
     }
 
     // While There's No Recursive Depth Limit, We Should Warn The User About High Values
@@ -170,7 +163,7 @@ public:
     }
 
     // Loop Through The < File Extension -> fs::path> Map and The Move the Files To Their Filetype Directory in OutputPath
-    customError sort() {
+    void sort() {
 
         // Loop Through the Extension Map
         for (std::pair <std::string, std::set<fs::path>> element : generateExtensionMap()) {
@@ -188,7 +181,6 @@ public:
                 fs::rename(file, newPath);
             }
         }
-        return customError();
     }
 
     // The Second Main Feature, Unpack Files and Folders in inputPath, and Move The Files To outputPath
@@ -217,13 +209,14 @@ public:
         }
 
         catch (fs::filesystem_error fsErr) {
-            return customError(fsErr.what());
+            return customError(true, fsErr.what());
         }
 
-        return customError();
+        return customError(false, "");
     }
 };
 
+// Testing
 int main() {
 
     Organizer o;
