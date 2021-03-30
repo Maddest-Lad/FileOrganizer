@@ -37,18 +37,20 @@ private:
     bool ignoreExistingDirs;
 
     // Helper Method
-    static int getDepth(const fs::path a, const fs::path b) {
+    static int getDepth(const fs::path& a, const fs::path& b) {
 
         int aCnt = 0;
         int bCnt = 0;
 
-        for (const char c : a.string()) {
+        const std::basic_string aStr(a.string());
+        for (const char c : aStr) {
             if (c == '\\') {
                 aCnt++;
             }
         }
 
-        for (const char c : b.string()) {
+        const std::basic_string bStr(b.string());
+        for (const char c : bStr) {
             if (c == '\\') {
                 bCnt++;
             }
@@ -64,17 +66,16 @@ public:
     // * Maybe have this load a config.txt / settings.json style thing
     // Maybe Make This A Pseduo-Singleton Via Statics 
     // * (Although It Should Be Pretty Apparent That You Don't Won't Concurrent IO Operations)
-    Organizer() {
-
-        // Default Values
-        ignoreExistingDirs = false;
-        deleteOriginal = false;
-        recursiveDepth = 1;
+    Organizer() :
+        ignoreExistingDirs(false),
+        deleteOriginal(false),
+        recursiveDepth(1) 
+    {
     }
 
     // Now This Might be Overkill For The Setter Methods,
     // But I'm Hoping This Prevents Any Path Based Errors Down The Line
-    customError setInputPath(std::string str) {
+    customError setInputPath(const std::string& str) {
         try {
             if (fs::exists(fs::path(str))) {
                 inputPath = fs::path(str);
@@ -138,22 +139,28 @@ public:
         }
     }
 
+    // STL predicate for case-insensitive collections.  Since NTFS is case-preserving but case-insensitive any
+    // collection that stores paths should search in a case-insensitive way.
+    struct CaseInsensitive {
+        bool operator() (const std::string& lhs, const std::string& rhs) const {
+            return _stricmp(lhs.c_str(), rhs.c_str()) < 0;
+        }
+    };
+
     // Create A Map Of Extension Strings That Map To Sets Containing The Paths Of Those Files
     // Implicit Argument of "this."currentFiles
-    std::map <std::string, std::set<fs::path>> generateExtensionMap() {
+    std::map <std::string, std::set<fs::path>, CaseInsensitive> generateExtensionMap() {
 
-        std::map <std::string, std::set<fs::path>> ExtensionMap;
+        std::map <std::string, std::set<fs::path>, CaseInsensitive> ExtensionMap;
 
         for (const fs::path entry : currentFiles) {
 
-            std::string extStr = entry.extension().string();
-            extStr.erase(0, 1); // Trim the "." From The Extension (For Ease of Searching In a POSIX Filesystem)
+            std::string extStr(entry.extension().string().erase(0, 1)); // Trim the "." From The Extension (For Ease of Searching In a POSIX Filesystem)
 
             // Is This Value Already in The Set, If So, Don't Create The File Map
-            if (ExtensionMap.count(extStr) < 0) {
+            if (ExtensionMap.find(extStr) != ExtensionMap.end()) {
                 // There's Probably an Inline Way, I Just Don't Know It
-                std::set <fs::path> files;
-                ExtensionMap[extStr] = files;
+                ExtensionMap[extStr] = std::set <fs::path>();
             }
             // Lastly, Add The Entry (path) to the Set
             ExtensionMap[extStr].insert(entry);
@@ -166,17 +173,20 @@ public:
     void sort() {
 
         // Loop Through the Extension Map
-        for (std::pair <std::string, std::set<fs::path>> element : generateExtensionMap()) {
+        auto extensionMap = generateExtensionMap();
+        for (std::pair <std::string, std::set<fs::path>> element : extensionMap) {
 
             // Grab The Current Extension and Create It's Folder
             fs::path ext = element.first;
             fs::path outputFolder = outputPath / ext;
+            
+            // TODO: Error handling
             fs::create_directory(outputFolder);
 
             // Loop Through That Extension's File Set, And Move Them to outputFolder
-            std::set <fs::path> pathAndFilename = element.second;
+            std::set <fs::path>& pathAndFilename = element.second;
 
-            for (fs::path file : element.second) {
+            for (fs::path file : pathAndFilename) {
                 fs::path newPath = outputFolder / file.filename();
                 fs::rename(file, newPath);
             }
