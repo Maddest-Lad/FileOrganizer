@@ -42,14 +42,14 @@ private:
         int aCnt = 0;
         int bCnt = 0;
 
-        const std::basic_string aStr(a.string());
+        const std::string aStr(a.string());
         for (const char c : aStr) {
             if (c == '\\') {
                 aCnt++;
             }
         }
 
-        const std::basic_string bStr(b.string());
+        const std::string bStr(b.string());
         for (const char c : bStr) {
             if (c == '\\') {
                 bCnt++;
