@@ -3,4 +3,4 @@ project(FileOrganizer)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(FileOrganizer Organizer.cpp)
+add_executable(FileOrganizer Organizer.cpp src/model.cpp)
