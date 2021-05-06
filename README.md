@@ -1,5 +1,22 @@
 # File Organizer
-A C++ Script (Eventually I'll Make a GUI) Which Sorts Files Into Sub-Folders Based On File Extension
+A C++ Script Which Sorts Files Into Sub-Folders Based On File Extension, ported from my [Python implementation](https://github.com/SamHarris2020/Assorted-Projects/blob/master/File%20Sorter/Sorter.py)
+
+
+### Example Run
+
+Starting Directiory `Downloads/` contains the following files:
+ * essay.docx
+ * bitmap.bmp
+ * icon.png
+ * profile_pic.png
+
+Resulting File Structure:
+```
+Downloads/docx/essay.docx
+Downloads/bmp/bitmap.bmp
+Downloads/png/icon.png
+Downloads/png/profile_pic.png
+```
 
 ### License
 
