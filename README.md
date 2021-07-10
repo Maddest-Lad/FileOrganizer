@@ -4,7 +4,7 @@ A C++ Script Which Sorts Files Into Sub-Folders Based On File Extension, ported 
 
 ### Example Run
 
-Starting Directiory `Downloads/` contains the following files:
+Let's Say Your Downloads Folder Happens To Contain The Following Files:
  * essay.docx
  * bitmap.bmp
  * icon.png
